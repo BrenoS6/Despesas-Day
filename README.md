@@ -1,4 +1,4 @@
-# 💰 Expense AI - Controle de Despesas com IA
+# Controle de Despesas com IA
 
 App mobile para controle de despesas pessoais com ajuda de inteligência artificial (Google Gemini). Categorize despesas automaticamente, receba alertas e dicas de economia personalizadas.
 
