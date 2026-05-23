@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="App de controle de despesas com IA">
+    <meta name="theme-color" content="#6366f1">
+    <title>Expense AI - Controle de Despesas</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%236366f1' width='180' height='180'/><text x='50%' y='50%' font-size='80' fill='white' text-anchor='middle' dominant-baseline='middle' font-weight='bold'>💰</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>💰 Expense AI</h1>
+                <p>Controle de Despesas com IA</p>
+            </div>
+            <button class="btn-settings" onclick="openSettings()" title="Configurações">⚙️</button>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Início</button>
+            <button class="nav-tab" onclick="switchTab('add')">➕ Adicionar</button>
+            <button class="nav-tab" onclick="switchTab('analytics')">📈 Análise</button>
+            <button class="nav-tab" onclick="switchTab('tips')">💡 Dicas</button>
+        </nav>
+
+        <!-- Dashboard Tab -->
+        <section id="dashboard" class="tab-content active">
+            <div class="dashboard">
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="card card-total">
+                        <h3>Total Mês</h3>
+                        <p class="amount" id="totalMonth">R$ 0,00</p>
+                    </div>
+                    <div class="card card-budget">
+                        <h3>Orçamento</h3>
+                        <p class="amount" id="budgetAmount">R$ 0,00</p>
+                    </div>
+                    <div class="card card-alert" id="cardAlert">
+                        <h3>Status</h3>
+                        <p class="status" id="alertStatus">✅ Normal</p>
+                    </div>
+                </div>
+
+                <!-- Recent Expenses -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2>Despesas Recentes</h2>
+                        <button class="btn-secondary" onclick="deleteAllExpenses()">Limpar Histórico</button>
+                    </div>
+                    <div id="recentExpenses" class="expenses-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add Expense Tab -->
+        <section id="add" class="tab-content">
+            <div class="section">
+                <h2>Adicionar Despesa</h2>
+                <form id="expenseForm" class="form">
+                    <div class="form-group">
+                        <label for="description">Descrição</label>
+                        <input type="text" id="description" placeholder="Ex: Almoço no restaurante" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amount">Valor (R$)</label>
+                        <input type="number" id="amount" placeholder="0.00" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Categoria</label>
+                        <select id="category" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="alimentacao">🍔 Alimentação</option>
+                            <option value="transporte">🚗 Transporte</option>
+                            <option value="moradia">🏠 Moradia</option>
+                            <option value="saude">⚕️ Saúde</option>
+                            <option value="educacao">📚 Educação</option>
+                            <option value="lazer">🎬 Lazer</option>
+                            <option value="compras">🛍️ Compras</option>
+                            <option value="utilidades">💡 Utilidades</option>
+                            <option value="outro">❓ Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Data</label>
+                        <input type="date" id="date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="aiCategory" checked>
+                            Usar IA para categorizar automaticamente
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Adicionar Despesa</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Analytics Tab -->
+        <section id="analytics" class="tab-content">
+            <div class="section">
+                <h2>Análise de Despesas</h2>
+                
+                <div class="form-group">
+                    <label for="monthFilter">Mês</label>
+                    <input type="month" id="monthFilter" onchange="updateAnalytics()">
+                </div>
+
+                <div class="analytics-container">
+                    <canvas id="categoryChart" width="400" height="200"></canvas>
+                </div>
+
+                <div class="analytics-table">
+                    <h3>Resumo por Categoria</h3>
+                    <table id="categoryTable">
+                        <thead>
+                            <tr>
+                                <th>Categoria</th>
+                                <th>Total</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tips Tab -->
+        <section id="tips" class="tab-content">
+            <div class="section">
+                <h2>Dicas de Economia</h2>
+                <button class="btn-primary" onclick="generateTips()">🤖 Gerar Dicas com IA</button>
+                <div id="tipsContainer" class="tips-container"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configurações</h2>
+                <button class="btn-close" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="geminiKey">Chave API Google Gemini</label>
+                    <input type="password" id="geminiKey" placeholder="Cole sua chave aqui">
+                    <small>Obtenha em: https://ai.google.dev/</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="budgetInput">Orçamento Mensal (R$)</label>
+                    <input type="number" id="budgetInput" placeholder="0.00" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="alertThreshold">Alerta quando atingir (%) do orçamento</label>
+                    <input type="number" id="alertThreshold" min="0" max="100" placeholder="80">
+                </div>
+
+                <div class="form-group">
+                    <button class="btn-secondary" onclick="exportData()">📥 Exportar Dados</button>
+                    <button class="btn-secondary" onclick="importData()">📤 Importar Dados</button>
+                </div>
+
+                <button class="btn-primary" onclick="saveSettings()">Salvar Configurações</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Carregando...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Input hidden for import -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
